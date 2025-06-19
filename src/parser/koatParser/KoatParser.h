@@ -13,10 +13,11 @@ class  KoatParser : public antlr4::Parser {
 public:
   enum {
     COM = 1, GOAL = 2, CPX = 3, TERM = 4, START = 5, SINK = 6, FS = 7, VAR = 8, 
-    RULES = 9, PLUS = 10, MINUS = 11, TIMES = 12, EXP = 13, LPAR = 14, RPAR = 15, 
-    RBRACK = 16, LBRACK = 17, LCURL = 18, RCURL = 19, TO = 20, COMMA = 21, 
-    AND = 22, OR = 23, LT = 24, LEQ = 25, EQ = 26, NEQ = 27, GEQ = 28, GT = 29, 
-    CONDSEP = 30, ID = 31, INT = 32, WS = 33, COMMENT = 34
+    RULES = 9, PLUS = 10, MINUS = 11, TIMES = 12, BWAND = 13, EXP = 14, 
+    LPAR = 15, RPAR = 16, RBRACK = 17, LBRACK = 18, LCURL = 19, RCURL = 20, 
+    TO = 21, COMMA = 22, AND = 23, OR = 24, LT = 25, LEQ = 26, EQ = 27, 
+    NEQ = 28, GEQ = 29, GT = 30, CONDSEP = 31, ID = 32, INT = 33, WS = 34, 
+    COMMENT = 35
   };
 
   enum {
@@ -377,6 +378,7 @@ public:
     antlr4::tree::TerminalNode *EXP();
     antlr4::tree::TerminalNode *TIMES();
     antlr4::tree::TerminalNode *PLUS();
+    antlr4::tree::TerminalNode *BWAND();
 
     virtual void enterRule(antlr4::tree::ParseTreeListener *listener) override;
     virtual void exitRule(antlr4::tree::ParseTreeListener *listener) override;

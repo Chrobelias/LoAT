@@ -181,6 +181,8 @@ antlrcpp::Any KoatParseVisitor::visitExpr(KoatParser::ExprContext *ctx) {
             return arg1 * arg2;
         } else if (ctx->PLUS()) {
             return arg1 + arg2;
+        } else if (ctx->BWAND()) {
+            return arg1 & arg2;
         }
     }
     throw std::invalid_argument("failed to parse expression " + ctx->getText());

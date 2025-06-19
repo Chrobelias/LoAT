@@ -64,6 +64,10 @@ ArithExprPtr operator*(const ArithExprPtr x, const ArithExprPtr y) {
     return arith::mkTimes(x,y);
 }
 
+ArithExprPtr operator&(const ArithExprPtr x, const ArithExprPtr y) {
+    return arith::mkBWAnd(x,y);
+}
+
 ArithExprPtr ArithExpr::divide(const Rational &y) const {
     return arith::mkTimes(arith::mkConst(Rational(mp::denominator(y), mp::numerator(y))), toPtr());
 }
@@ -126,6 +130,14 @@ const std::optional<ArithAddPtr> ArithExpr::isAdd() const {
     }
 }
 
+const std::optional<ArithBWAndPtr> ArithExpr::isBWAnd() const {
+    if (kind == arith::Kind::BWAnd) {
+        return cpp::assume_not_null(static_pointer_cast<const ArithBWAnd>(shared_from_this()));
+    } else {
+        return {};
+    }
+}
+
 bool ArithExpr::isLinear(const std::optional<linked_hash_set<ArithVarPtr>> &vars) const {
     const auto is_linear {[&](const auto &arg) -> bool {
         return arg->isLinear(vars);
@@ -168,6 +180,9 @@ bool ArithExpr::isLinear(const std::optional<linked_hash_set<ArithVarPtr>> &vars
         },
         [&](const ArithExpPtr e) {
             return is_constant(e);
+        },
+        [](const ArithBWAndPtr) {
+            return false;
         });
 }
 
@@ -214,6 +229,9 @@ std::optional<Int> ArithExpr::isPoly() const {
                 }
             }
             return opt{};
+        },
+        [](const ArithBWAndPtr) {
+            return false;
         });
 }
 
@@ -240,6 +258,10 @@ void ArithExpr::collectVars(linked_hash_set<ArithVarPtr> &res) const {
         [&](const ArithExpPtr e) {
             e->getBase()->collectVars(res);
             e->getExponent()->collectVars(res);
+        },
+        [&](const ArithBWAndPtr e) {
+            e->getLhs()->collectVars(res);
+            e->getRhs()->collectVars(res);
         });
 }
 
@@ -268,6 +290,9 @@ bool ArithExpr::hasVarWith(const std::function<bool(const ArithVarPtr)> predicat
         },
         [&](const ArithExpPtr e) {
             return e->getBase()->hasVarWith(predicate) || e->getExponent()->hasVarWith(predicate);
+        },
+        [&](const ArithBWAndPtr e) {
+            return e->getLhs()->hasVarWith(predicate) || e->getRhs()->hasVarWith(predicate);
         });
 }
 
@@ -317,7 +342,12 @@ std::optional<Int> ArithExpr::isPoly(const ArithVarPtr var) const {
                 }
             }
             return opt{};
-        });
+        },
+        [](const ArithBWAndPtr) {
+            throw std::logic_error("BWAnd is not implemented here" __FILE__ ":" STR(__LINE__) );
+            return opt{};
+        }
+    );
 }
 
 Int ArithExpr::denomLcm() const {
@@ -344,6 +374,9 @@ Int ArithExpr::denomLcm() const {
             return m->getLhs()->denomLcm() * m->getRhs()->denomLcm();
         },
         [](const ArithExpPtr) {
+            return 1;
+        },
+        [](const ArithBWAndPtr) {
             return 1;
         });
 }
@@ -380,6 +413,9 @@ Rational ArithExpr::getConstantFactor() const {
         },
         [](const ArithExprPtr) {
             return 1;
+        },
+        [](const ArithBWAndPtr) {
+            return 1;
         });
 }
 
@@ -405,6 +441,9 @@ Rational ArithExpr::getConstantAddend() const {
             return 0;
         },
         [](const ArithExprPtr) {
+            return 0;
+        },
+        [](const ArithBWAndPtr) {
             return 0;
         });
 }
@@ -443,7 +482,12 @@ std::optional<ArithVarPtr> ArithExpr::someVar() const {
         [](const ArithExpPtr e) {
             const auto res {e->getBase()->someVar()};
             return res ? res : e->getExponent()->someVar();
-        });
+        },
+        [](const ArithBWAndPtr e) {
+            const auto res {e->getLhs()->someVar()};
+            return res ? res : e->getRhs()->someVar();
+        }
+        );
 }
 
 std::optional<ArithExprPtr> ArithExpr::coeff(const ArithVarPtr var, const Int &degree) const {
@@ -496,6 +540,10 @@ std::optional<ArithExprPtr> ArithExpr::coeff(const ArithVarPtr var, const Int &d
             if (e->isPoly(var)) {
                 return opt{arith::mkConst(0)};
             }
+            return opt{};
+        },
+        [](const ArithBWAndPtr e) {
+            throw std::logic_error("BWAnd is not implemented here" __FILE__ ":" STR(__LINE__) );
             return opt{};
         });
 }
@@ -555,6 +603,10 @@ std::optional<ArithExprPtr> ArithExpr::lcoeff(const ArithVarPtr var) const {
             if (e->isPoly(var)) {
                 return opt{arith::mkConst(1)};
             }
+            return opt{};
+        },
+        [](const ArithBWAndPtr e) {
+            throw std::logic_error("BWAnd is not implemented here" __FILE__ ":" STR(__LINE__) );
             return opt{};
         });
 }
@@ -623,6 +675,10 @@ bool ArithExpr::isIntegral() const {
         },
         [](const ArithExpPtr e) {
             return true;
+        },
+        [](const ArithBWAndPtr e) {
+            throw std::logic_error("BWAnd is not implemented here" __FILE__ ":" STR(__LINE__) );
+            return false;
         });
 }
 
@@ -660,6 +716,10 @@ Rational ArithExpr::evalToRational(const linked_hash_map<ArithVarPtr, Int> &valu
         },
         [&](const ArithExpPtr e) {
             return mp::pow(mp::numerator(e->getBase()->evalToRational(valuation)), e->getExponent()->evalToRational(valuation).convert_to<long>());
+        },
+        [](const ArithBWAndPtr e) {
+            throw std::logic_error("BWAnd is not implemented here" __FILE__ ":" STR(__LINE__) );
+            return -1;
         });
 }
 
@@ -752,6 +812,12 @@ sexpresso::Sexp ArithExpr::to_smtlib() const {
             res.addChild(e->getBase()->to_smtlib());
             res.addChild(e->getExponent()->to_smtlib());
             return res;
+        },
+        [&](const ArithBWAndPtr e) {
+            sexpresso::Sexp res{"bw_and"};
+            res.addChild(e->getLhs()->to_smtlib());
+            res.addChild(e->getRhs()->to_smtlib());
+            return res;
         }
     );
 }
@@ -788,6 +854,9 @@ ArithExprPtr ArithExpr::renameVars(const arith_var_map &map) const {
         },
         [&](const ArithExpPtr e) {
             return ArithExp::cache.from_cache(e->getBase()->renameVars(map), e->getExponent()->renameVars(map));
+        },
+        [&](const ArithBWAndPtr e) {
+            return ArithBWAnd::cache.from_cache(e->getLhs()->renameVars(map), e->getRhs()->renameVars(map));
         }
     );
 }
@@ -821,6 +890,10 @@ std::pair<Rational, std::optional<ArithExprPtr>> ArithExpr::decompose() const {
         },
         [](const ArithExpPtr e) {
             return pair {1, {e}};
+        },
+        [](const ArithBWAndPtr e) {
+            throw std::logic_error("BWAnd is not implemented here" __FILE__ ":" STR(__LINE__) );
+            return pair {1, {e}};
         });
 }
 
@@ -842,6 +915,9 @@ bool ArithExpr::isNegated() const {
             return false;
         },
         [](const ArithExpPtr) {
+            return false;
+        },
+        [](const ArithBWAndPtr e) {
             return false;
         }
     );
@@ -943,6 +1019,21 @@ std::ostream& operator<<(std::ostream &s, const ArithExprPtr e) {
                 s << "(" << e << ")";
             } else {
                 s << e;
+            }
+        },
+        [&](const ArithBWAndPtr e) {
+            const auto lhs {e->getLhs()};
+            const auto rhs {e->getRhs()};
+            if (lhs->isRational() || lhs->isVar()) {
+                s << e->getLhs();
+            } else {
+                s << "(" << e->getLhs() << ")";
+            }
+            s << " & ";
+            if (rhs->isRational() || rhs->isVar()) {
+                s << e->getRhs();
+            } else {
+                s << "(" << e->getRhs() << ")";
             }
         });
     return s;

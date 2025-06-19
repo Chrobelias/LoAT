@@ -215,5 +215,8 @@ ArithExprPtr ArithSubs::operator()(const ArithExprPtr t) const {
         },
         [&](const ArithExpPtr e) {
             return arith::mkExp((*this)(e->getBase()), (*this)(e->getExponent()));
+        },
+        [&](const ArithBWAndPtr e) {
+            return arith::mkBWAnd((*this)(e->getLhs()), (*this)(e->getRhs()));
         });
 }

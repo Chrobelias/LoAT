@@ -49,6 +49,10 @@ cvc5::Term CVC5Context::mod(const cvc5::Term &x, const cvc5::Term &y) {
     return ctx.mkTerm(cvc5::Kind::INTS_MODULUS, {x, y});
 }
 
+cvc5::Term CVC5Context::bwand(const cvc5::Term &x, const cvc5::Term &y) {
+    throw std::logic_error("BWAnd is not implemented here" __FILE__ ":" STR(__LINE__) );
+}
+
 cvc5::Term CVC5Context::eq(const cvc5::Term &x, const cvc5::Term &y) {
     if (x.getSort() != y.getSort()
         && (x.getSort() == ctx.getRealSort() || y.getSort() == ctx.getRealSort())

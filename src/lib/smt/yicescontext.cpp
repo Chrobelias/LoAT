@@ -54,6 +54,10 @@ term_t YicesContext::mod(const term_t &x, const term_t &y) {
     return yices_imod(x, y);
 }
 
+term_t YicesContext::bwand(const term_t &x, const term_t &y) {
+    throw std::logic_error("BWAnd is not implemented here" __FILE__ ":" STR(__LINE__) );
+}
+
 term_t YicesContext::eq(const term_t &x, const term_t &y) {
     return yices_arith_eq_atom(x, y);
 }

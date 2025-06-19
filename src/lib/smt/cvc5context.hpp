@@ -16,6 +16,7 @@ public:
     cvc5::Term plus(const std::vector<cvc5::Term> &args) override;
     cvc5::Term times(const std::vector<cvc5::Term> &args) override;
     cvc5::Term mod(const cvc5::Term &x, const cvc5::Term &y) override;
+    cvc5::Term bwand(const cvc5::Term &x, const cvc5::Term &y) override;
     cvc5::Term eq(const cvc5::Term &x, const cvc5::Term &y) override;
     cvc5::Term lt(const cvc5::Term &x, const cvc5::Term &y) override;
     cvc5::Term le(const cvc5::Term &x, const cvc5::Term &y) override;

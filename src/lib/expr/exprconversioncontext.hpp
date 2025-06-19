@@ -16,6 +16,7 @@ public:
     virtual Expr plus(const ExprVec &args) = 0;
     virtual Expr times(const ExprVec &args) = 0;
     virtual Expr mod(const Expr &x, const Expr &y) = 0;
+    virtual Expr bwand(const Expr &x, const Expr &y) = 0;
     virtual Formula eq(const Expr &x, const Expr &y) = 0;
     virtual Formula lt(const Expr &x, const Expr &y) = 0;
     virtual Formula le(const Expr &x, const Expr &y) = 0;

@@ -42,6 +42,10 @@ z3::expr Z3Context::mod(const z3::expr &x, const z3::expr &y) {
     return x % y;
 }
 
+z3::expr Z3Context::bwand(const z3::expr &x, const z3::expr &y) {
+    throw std::logic_error("BWAnd is not implemented here" __FILE__ ":" STR(__LINE__) );
+}
+
 z3::expr Z3Context::eq(const z3::expr &x, const z3::expr &y) {
     return x == y;
 }

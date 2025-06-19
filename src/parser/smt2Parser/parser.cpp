@@ -156,6 +156,8 @@ namespace sexpressionparser {
                 return fst - snd;
             } else if (op == "*") {
                 return fst * snd;
+            } else if (op == "&") {
+                return fst & snd;
             }
         } else if (sexp.childCount() == 2) {
             assert(op == "-");

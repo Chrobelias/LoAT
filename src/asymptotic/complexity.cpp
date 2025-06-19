@@ -131,6 +131,10 @@ Complexity toComplexityRec(const Arith::Expr term) {
                        [&](const auto &exp) {
                            return exp < 0 ? Complexity::Unknown : toComplexityRec(e->getBase()) ^ exp;
                        }).value_or(Complexity::Unknown);
+        },
+        [](const ArithBWAndPtr e) {
+            throw std::logic_error("BWAnd is not implemented here" __FILE__ ":" STR(__LINE__) );
+            return Complexity::Const;
         });
 }
 

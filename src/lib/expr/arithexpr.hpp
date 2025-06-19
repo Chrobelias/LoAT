@@ -1,5 +1,10 @@
 #pragma once
 
+#ifndef STR
+#define _STR(x) #x
+#define STR(x) _STR(x)
+#endif
+
 #include <optional>
 
 #include "linkedhashset.hpp"
@@ -12,6 +17,7 @@ class ArithExp;
 class ArithAdd;
 class ArithMult;
 class ArithMod;
+class ArithBWAnd;
 
 using ArithExprPtr = cpp::not_null<std::shared_ptr<const ArithExpr>>;
 using ArithVarPtr = cpp::not_null<std::shared_ptr<const ArithVar>>;
@@ -20,6 +26,7 @@ using ArithAddPtr = cpp::not_null<std::shared_ptr<const ArithAdd>>;
 using ArithMultPtr = cpp::not_null<std::shared_ptr<const ArithMult>>;
 using ArithModPtr = cpp::not_null<std::shared_ptr<const ArithMod>>;
 using ArithExpPtr = cpp::not_null<std::shared_ptr<const ArithExp>>;
+using ArithBWAndPtr = cpp::not_null<std::shared_ptr<const ArithBWAnd>>;
 using ArithExprSet = linked_hash_set<ArithExprPtr>;
 using ArithExprVec = std::vector<ArithExprPtr>;
 
@@ -31,6 +38,7 @@ ArithExprPtr mkPlus(ArithExprPtr, ArithExprPtr);
 ArithExprPtr mkTimesImpl(ArithExprVec &&args);
 ArithExprPtr mkTimes(ArithExprVec &&args);
 ArithExprPtr mkTimes(const ArithExprPtr, const ArithExprPtr);
+ArithExprPtr mkBWAnd(const ArithExprPtr, const ArithExprPtr);
 ArithExprPtr mkMod(ArithExprPtr x, ArithExprPtr y);
 ArithExprPtr mkConst(const Rational &r);
 ArithExprPtr mkConst(const Rational &&r);
@@ -38,7 +46,8 @@ ArithExprPtr mkExp(const ArithExprPtr base, const ArithExprPtr exponent);
 ArithExprPtr mkVar(const int idx);
 
 enum class Kind {
-    Plus, Times, Mod, Exp, Constant, Variable
+    Plus, Times, Mod, Exp, Constant, Variable,
+    BWAnd
 };
 
 }
@@ -71,7 +80,8 @@ public:
           const std::function<T(const ArithAddPtr)> &add,
           const std::function<T(const ArithMultPtr)> &mult,
           const std::function<T(const ArithModPtr)> &mod,
-          const std::function<T(const ArithExpPtr)> &exp) const {
+          const std::function<T(const ArithExpPtr)> &exp,
+          const std::function<T(const ArithBWAndPtr)> &bwand) const {
         const auto c {isRational()};
         if (c) {
             return constant(*c);
@@ -96,6 +106,10 @@ public:
         if (e) {
             return exp(*e);
         }
+        const auto bw {isBWAnd()};
+        if (bw) {
+            return bwand(*bw);
+        }
         throw std::invalid_argument("unknown expression" + toString(this->shared_from_this()));
     }
 
@@ -115,6 +129,8 @@ public:
     const std::optional<ArithMultPtr> isMult() const;
 
     const std::optional<ArithModPtr> isMod() const;
+
+    const std::optional<ArithBWAndPtr> isBWAnd() const;
 
     /**
      * @return True iff this is of the form x+y for some expressions x, y.
@@ -212,6 +228,7 @@ public:
     friend ArithExprPtr operator-(const ArithExprPtr x, const ArithExprPtr y);
     friend ArithExprPtr operator+(const ArithExprPtr x, const ArithExprPtr y);
     friend ArithExprPtr operator*(const ArithExprPtr x, const ArithExprPtr y);
+    friend ArithExprPtr operator&(const ArithExprPtr x, const ArithExprPtr y);
 
 };
 
@@ -367,6 +384,35 @@ public:
 
     ArithExprPtr getBase() const;
     ArithExprPtr getExponent() const;
+
+};
+
+class ArithBWAnd: public ArithExpr {
+
+    friend ArithExprPtr arith::mkBWAnd(ArithExprPtr x, ArithExprPtr y);
+    friend class ArithExpr;
+
+public:
+
+    const ArithExprPtr getLhs() const;
+    const ArithExprPtr getRhs() const;
+
+private:
+
+    ArithExprPtr lhs;
+    ArithExprPtr rhs;
+
+    struct CacheEqual {
+        bool operator()(const std::tuple<ArithExprPtr, ArithExprPtr> &args1, const std::tuple<ArithExprPtr, ArithExprPtr> &args2) const noexcept;
+    };
+    struct CacheHash {
+        size_t operator()(const std::tuple<ArithExprPtr, ArithExprPtr> &args) const noexcept;
+    };
+    static ConsHash<ArithExpr, ArithBWAnd, CacheHash, CacheEqual, ArithExprPtr, ArithExprPtr> cache;
+
+public:
+    ArithBWAnd(const ArithExprPtr, const ArithExprPtr);
+    ~ArithBWAnd();
 
 };
 

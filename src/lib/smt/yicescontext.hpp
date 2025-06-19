@@ -20,6 +20,7 @@ public:
     term_t plus(const std::vector<term_t> &args) override;
     term_t times(const std::vector<term_t> &args) override;
     term_t mod(const term_t &x, const term_t &y) override;
+    term_t bwand(const term_t &x, const term_t &y) override;
     term_t eq(const term_t &x, const term_t &y) override;
     term_t lt(const term_t &x, const term_t &y) override;
     term_t le(const term_t &x, const term_t &y) override;

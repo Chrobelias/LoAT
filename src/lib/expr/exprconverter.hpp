@@ -92,6 +92,9 @@ protected:
                     }
                 }
                 return context.pow(convertEx(base), convertEx(exp));
+            },
+            [&](const ArithBWAndPtr e) {
+                return context.bwand(convertEx(e->getLhs()), convertEx(e->getRhs()));
             });
     }
 

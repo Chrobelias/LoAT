@@ -172,6 +172,10 @@ bool Recurrence::solve(const Arith::Var x, const Arith::Expr rhs) {
                             } else {
                                 return false;
                             }
+                        },
+                        [](const ArithBWAndPtr bwand) {
+                            throw std::logic_error("BWAnd is not implemented here" __FILE__ ":" STR(__LINE__));
+                            return false;
                         })};
                 if (!success) {
                     return false;
