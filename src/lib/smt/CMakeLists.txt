@@ -25,6 +25,10 @@ add_library(${PROJECT_NAME} OBJECT
   swinecontext.cpp
   smtfactory.hpp
   smtfactory.cpp
+  chro.hpp
+  chro.cpp
+  chrocontext.hpp
+  chrocontext.cpp
 )
 
 target_include_directories(${PROJECT_NAME} PRIVATE

@@ -1,4 +1,5 @@
 #include "smtfactory.hpp"
+#include "chro.hpp"
 #include "yices.hpp"
 #include "z3.hpp"
 #include "swine.hpp"
@@ -53,6 +54,8 @@ SmtPtr solver() {
     case Config::Analysis::Heuristic:
         solver = std::unique_ptr<Smt>(new Swine());
         break;
+    case Config::Analysis::Chro:
+        solver = std::unique_ptr<Chro>(new Chro());
     }
     return solver;
 }
