@@ -21,6 +21,7 @@ void Swine::pop() {
 }
 
 SmtResult Swine::check() {
+    std::cout << solver << std::endl << std::flush;
     switch (solver.check()) {
     case z3::unsat:
         return SmtResult::Unsat;
@@ -33,6 +34,7 @@ SmtResult Swine::check() {
 }
 
 Model Swine::model(const std::optional<const VarSet> &vars) {
+    std::cout << solver << std::endl << std::flush;
     const z3::model &m = solver.get_model();
     Model res;
     const auto add = [&](const Var &x) {
