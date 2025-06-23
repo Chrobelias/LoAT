@@ -344,8 +344,7 @@ std::optional<Int> ArithExpr::isPoly(const ArithVarPtr var) const {
             return opt{};
         },
         [](const ArithBWAndPtr) {
-            throw std::logic_error("BWAnd is not implemented here" __FILE__ ":" STR(__LINE__) );
-            return opt{};
+            return opt{0};
         }
     );
 }
@@ -717,9 +716,8 @@ Rational ArithExpr::evalToRational(const linked_hash_map<ArithVarPtr, Int> &valu
         [&](const ArithExpPtr e) {
             return mp::pow(mp::numerator(e->getBase()->evalToRational(valuation)), e->getExponent()->evalToRational(valuation).convert_to<long>());
         },
-        [](const ArithBWAndPtr e) {
-            throw std::logic_error("BWAnd is not implemented here" __FILE__ ":" STR(__LINE__) );
-            return -1;
+        [&](const ArithBWAndPtr e) {
+            return ((Int)e->getLhs()->evalToRational(valuation)) & ((Int)e->getRhs()->evalToRational(valuation));
         });
 }
 
@@ -892,7 +890,6 @@ std::pair<Rational, std::optional<ArithExprPtr>> ArithExpr::decompose() const {
             return pair {1, {e}};
         },
         [](const ArithBWAndPtr e) {
-            throw std::logic_error("BWAnd is not implemented here" __FILE__ ":" STR(__LINE__) );
             return pair {1, {e}};
         });
 }
