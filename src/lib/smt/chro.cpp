@@ -24,6 +24,7 @@ SmtResult Chro::check() {
         throw std::logic_error("read() failed");
     }
     close(stdoutfd);
+    std::cout << result << std::endl;
     if (strcmp(result, "sat\n") == 0) {
         return SmtResult::Sat;
     } else if (strcmp(result, "unsat\n") == 0) {
@@ -48,6 +49,7 @@ Model Chro::model(const std::optional<const VarSet> &vars) {
     }
     close(stdoutfd);
     std::string str{result};
+    std::cout << result << std::endl;
     if (strcmp(result, "no model") == 0) {
         throw std::logic_error("No model");
     }

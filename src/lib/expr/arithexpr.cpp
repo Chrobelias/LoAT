@@ -812,7 +812,7 @@ sexpresso::Sexp ArithExpr::to_smtlib() const {
             return res;
         },
         [&](const ArithBWAndPtr e) {
-            sexpresso::Sexp res{"bw_and"};
+            sexpresso::Sexp res{"bwand"};
             res.addChild(e->getLhs()->to_smtlib());
             res.addChild(e->getRhs()->to_smtlib());
             return res;
